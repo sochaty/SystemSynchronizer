@@ -6,5 +6,7 @@ namespace Synchronizer.Core.ApiCommunication.Bucket
 {
     public class BucketOverviewResponse
     {
+        public string BucketName { get; set; }
+        public DateTime CreationDate { get; set; }
     }
 }
