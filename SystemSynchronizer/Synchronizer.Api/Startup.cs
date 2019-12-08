@@ -4,10 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.S3;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using Synchronizer.Core.Contracts;
+using Synchronizer.Infrastructure.Repositories;
 
 namespace Synchronizer.Api
 {
@@ -24,6 +28,7 @@ namespace Synchronizer.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAWSService<IAmazonS3>(_configuration.GetAWSOptions());
+            services.AddSingleton<IBucketsRepository, BucketsRepository>();
             services.AddMvc();
         }
 
@@ -34,6 +39,13 @@ namespace Synchronizer.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseExceptionHandler( a => a.Run(async context => {
+                var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                var exception = exceptionHandlerPathFeature.Error;
+                var result = JsonConvert.SerializeObject(new { error = exception.Message });
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync(result);
+            }));
             app.UseMvc();            
         }
     }
