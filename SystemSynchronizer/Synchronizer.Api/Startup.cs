@@ -29,6 +29,7 @@ namespace Synchronizer.Api
         {
             services.AddAWSService<IAmazonS3>(_configuration.GetAWSOptions());
             services.AddSingleton<IBucketsRepository, BucketsRepository>();
+            services.AddSingleton<IFilesRepository, FilesRepository>();
             services.AddMvc();
         }
 
