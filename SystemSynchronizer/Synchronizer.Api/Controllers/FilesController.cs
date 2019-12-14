@@ -28,6 +28,12 @@ namespace Synchronizer.Api.Controllers
             {
                 return BadRequest("Request contains no file(s) to upload");
             }
+            var response = await _filesRepository.UploadFiles(bucketName, formFiles);
+            if (response == null)
+            {
+                return BadRequest();
+            }
+            return Ok(response);
         }
     }
 }

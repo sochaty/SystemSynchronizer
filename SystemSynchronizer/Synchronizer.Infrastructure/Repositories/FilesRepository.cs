@@ -1,11 +1,11 @@
 ﻿using Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.S3.Transfer;
-using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.Http;
 using Synchronizer.Core.ApiCommunication.Files;
 using Synchronizer.Core.Contracts;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Synchronizer.Infrastructure.Repositories
@@ -18,7 +18,7 @@ namespace Synchronizer.Infrastructure.Repositories
             _clientAmazonS3 = clientAmazonS3;
         }
 
-        public async Task<AddFileResponse> UploadFiles(string bucketName, IList<FormFile> formFiles)
+        public async Task<AddFileResponse> UploadFiles(string bucketName, IList<IFormFile> formFiles)
         {
             var response = new List<string>();
             foreach (var item in formFiles)
@@ -30,7 +30,23 @@ namespace Synchronizer.Infrastructure.Repositories
                     BucketName = bucketName,
                     CannedACL =  S3CannedACL.NoACL
                 };
+                using (var ftutility = new TransferUtility(_clientAmazonS3))
+                {
+                    await ftutility.UploadAsync(uploadRequest);
+                }
+                var presignedUrlRequest = new GetPreSignedUrlRequest
+                {
+                    BucketName = bucketName,
+                    Key = item.FileName,
+                    Expires = DateTime.Now.AddDays(1)
+                };
+                var url = _clientAmazonS3.GetPreSignedURL(presignedUrlRequest);
+                response.Add(url);
             }
+            return new AddFileResponse
+            {
+                PreSignedUrl = response
+            };
         }
     }
 }
