@@ -1,2 +1,2 @@
 # SystemSynchronizer
-SystemSynchronizer synchronizes files and images from system
+REST API written to perform basic file operations using AWS S3
