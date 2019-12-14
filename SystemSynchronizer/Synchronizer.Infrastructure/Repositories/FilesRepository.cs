@@ -6,6 +6,7 @@ using Synchronizer.Core.ApiCommunication.Files;
 using Synchronizer.Core.Contracts;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Synchronizer.Infrastructure.Repositories
@@ -46,6 +47,46 @@ namespace Synchronizer.Infrastructure.Repositories
             return new AddFileResponse
             {
                 PreSignedUrl = response
+            };
+        }
+
+        public async Task<IEnumerable<FileOverviewResponse>> ListFiles(string bucketName)
+        {
+            var response = await _clientAmazonS3.ListObjectsAsync(bucketName);
+            return response.S3Objects.Select(x => new FileOverviewResponse
+            {
+                BucketName = x.BucketName,
+                Key = x.Key,
+                Owner = x.Owner.DisplayName,
+                Size = x.Size
+            });
+        }
+        public async Task DownloadFile(string bucketName,string fileName,string downloadPath)
+        {
+            var pathAndFilename = $"{downloadPath}\\{fileName}";
+            var downloadRequest = new TransferUtilityDownloadRequest
+            {
+                BucketName = bucketName,
+                Key = fileName,
+                FilePath = pathAndFilename
+            };
+            using (var ftutility = new TransferUtility(_clientAmazonS3))
+            {
+                await ftutility.DownloadAsync(downloadRequest);
+            }
+        }
+
+        public async Task<DeleteFileResponse> DeleteFile(string bucketName, string fileName)
+        {
+            var objectDeleteRequest = new DeleteObjectsRequest
+            {
+                BucketName = bucketName
+            };
+            objectDeleteRequest.AddKey(fileName);
+            var response = await _clientAmazonS3.DeleteObjectsAsync(objectDeleteRequest);
+            return new DeleteFileResponse
+            {
+                NumberOfDeletedObjects = response.DeletedObjects.Count
             };
         }
     }
