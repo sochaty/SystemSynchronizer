@@ -6,5 +6,6 @@ namespace Synchronizer.Core.ApiCommunication.Files
 {
     public class AddFileResponse
     {
+        public IList<string> PreSignedUrl { get; set; }
     }
 }
