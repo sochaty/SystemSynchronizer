@@ -2,10 +2,12 @@
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using Synchronizer.Core.ApiCommunication.Files;
 using Synchronizer.Core.Contracts;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -88,6 +90,34 @@ namespace Synchronizer.Infrastructure.Repositories
             {
                 NumberOfDeletedObjects = response.DeletedObjects.Count
             };
+        }
+
+        public async Task AddJsonObject(string bucketName, AddJsonObjectRequest request)
+        {
+            var createdOn = DateTime.UtcNow;
+            var key = $"{createdOn:yyyy}/{createdOn:MM}/{createdOn:dd}/{request.Id}";
+            var putObjectRequest = new PutObjectRequest
+            {
+                BucketName = bucketName,
+                Key = key,
+                ContentBody = JsonConvert.SerializeObject(request)
+            };
+            await _clientAmazonS3.PutObjectAsync(putObjectRequest);
+        }
+
+        public async Task<GetJsonObjectResponse> GetJsonObject(string bucketName, string fileName)
+        {
+            var request = new GetObjectRequest
+            {
+                BucketName = bucketName,
+                Key = fileName
+            };
+            var response = await _clientAmazonS3.GetObjectAsync(request);
+            using (var reader = new StreamReader(response.ResponseStream))
+            {
+                var content = reader.ReadToEnd();
+                return JsonConvert.DeserializeObject<GetJsonObjectResponse>(content);
+            }
         }
     }
 }

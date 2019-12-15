@@ -65,5 +65,19 @@ namespace Synchronizer.Api.Controllers
             var response = await _filesRepository.DeleteFile(bucketName, fileName);
             return Ok(response);
         }
+        [HttpPost]
+        [Route("{bucketName}/addjsonobject")]
+        public async Task<IActionResult> AddJsonObject(string bucketName,AddJsonObjectRequest request)
+        {
+            await _filesRepository.AddJsonObject(bucketName, request);
+            return Ok();
+        }
+        [HttpGet]
+        [Route("{bucketName}/getjsonobject")]
+        public async Task<ActionResult<GetJsonObjectResponse>> GetJsonObject(string bucketName, string fileName)
+        {
+            var response = await _filesRepository.GetJsonObject(bucketName, fileName);
+            return Ok(response);
+        }
     }
 }

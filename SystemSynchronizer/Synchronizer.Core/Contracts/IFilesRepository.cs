@@ -14,5 +14,7 @@ namespace Synchronizer.Core.Contracts
         Task<IEnumerable<FileOverviewResponse>> ListFiles(string bucketName);
         Task DownloadFile(string bucketName, string fileName, string downloadPath);
         Task<DeleteFileResponse> DeleteFile(string bucketName, string fileName);
+        Task AddJsonObject(string bucketName, AddJsonObjectRequest request);
+        Task<GetJsonObjectResponse> GetJsonObject(string bucketName, string fileName);
     }
 }
