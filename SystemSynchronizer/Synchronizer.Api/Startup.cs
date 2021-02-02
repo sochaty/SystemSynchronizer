@@ -19,6 +19,7 @@ namespace Synchronizer.Api
     {
         private readonly IConfiguration _configuration;
 
+        //HelloJi
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
